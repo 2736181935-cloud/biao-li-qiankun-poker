@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>表里乾坤 · 扑克身世录</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero" aria-label="表里乾坤抽牌台">
+      <div class="ink-wash" aria-hidden="true"></div>
+      <nav class="topbar" aria-label="主导航">
+        <div class="brand-mark" aria-hidden="true">乾</div>
+        <div class="brand-copy">
+          <span>单人古风宫廷江湖 OC 抽牌跑团</span>
+          <strong>表里乾坤 · 扑克身世录</strong>
+        </div>
+        <div class="seal-row" aria-hidden="true">
+          <span>表</span><span>里</span><span>命</span><span>局</span>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <section class="oracle-panel" aria-label="抽牌结果">
+          <div class="panel-heading">
+            <p>牌局已设</p>
+            <h1>翻一张牌，定一世身。</h1>
+          </div>
+
+          <div class="draw-stage">
+            <div class="card-stack" aria-hidden="true">
+              <img src="assets/card-back.svg" alt="" class="card-back ghost ghost-one" />
+              <img src="assets/card-back.svg" alt="" class="card-back ghost ghost-two" />
+              <article class="revealed-card" id="mainCard">
+                <span class="card-suit">?</span>
+                <strong>未抽</strong>
+                <small>主身份</small>
+              </article>
+            </div>
+
+            <div class="result-scroll" id="resultScroll" aria-live="polite">
+              <div class="empty-state">
+                <span>未启封</span>
+                <p>点击“新开牌局”洗牌，再依次抽时代、主身份、宿命/羁绊；也可以把当前角色加入群像名册。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls" aria-label="抽牌控制">
+            <button class="primary-action" id="newGameBtn" type="button">
+              <span aria-hidden="true">✦</span>
+              新开牌局
+            </button>
+            <button class="secondary-action" id="eraBtn" type="button">抽时代牌</button>
+            <button class="secondary-action" id="identityBtn" type="button">抽主身份</button>
+            <button class="secondary-action" id="fateBtn" type="button">抽宿命/羁绊</button>
+            <button class="secondary-action" id="addOcBtn" type="button">加入群像角色</button>
+            <button class="icon-action" id="clearBtn" type="button" title="清空本局" aria-label="清空本局">↺</button>
+            <label class="toggle-line">
+              <input type="checkbox" id="dramaMode" checked />
+              <span>强剧情模式</span>
+            </label>
+          </div>
+        </section>
+
+        <aside class="codex-panel" aria-label="规则摘要">
+          <div class="codex-title">
+            <span>乾坤札记</span>
+            <h2>本局解牌</h2>
+          </div>
+          <div class="quick-grid">
+            <article>
+              <span>红牌</span>
+              <strong>表世界</strong>
+              <p>朝堂、市井、宫廷、公开游历。</p>
+            </article>
+            <article>
+              <span>黑牌</span>
+              <strong>里世界</strong>
+              <p>秘辛、暗杀、卧底、地下情报。</p>
+            </article>
+            <article>
+              <span>J/Q/K</span>
+              <strong>羁绊位</strong>
+              <p>近卫、贵女、王权天然牵连。</p>
+            </article>
+            <article>
+              <span>王</span>
+              <strong>真假王</strong>
+              <p>双王齐出，皇权主线强制开启。</p>
+            </article>
+          </div>
+          <div class="roster-panel" aria-live="polite">
+            <div class="roster-heading">
+              <span>群像名册</span>
+              <strong id="rosterCount">0 人入局</strong>
+            </div>
+            <div class="roster-list" id="rosterList">
+              <p>尚未收录 OC。完成主身份后可加入群像角色。</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="rule-board" aria-label="规则面板">
+      <div class="section-kicker">牌谱</div>
+      <h2>身份池与宿命札</h2>
+      <div class="tabs" role="tablist" aria-label="规则分类">
+        <button class="tab active" type="button" data-tab="identities">身份二十席</button>
+        <button class="tab" type="button" data-tab="fates">宿命十札</button>
+        <button class="tab" type="button" data-tab="flow">开局流程</button>
+      </div>
+
+      <div class="tab-panel active" id="identities"></div>
+      <div class="tab-panel" id="fates"></div>
+      <div class="tab-panel flow-panel" id="flow">
+        <article><b>一</b><span>点击“新开牌局”洗牌，再抽时代牌；红牌偏常规王朝，黑牌偏通商暗潮。</span></article>
+        <article><b>二</b><span>点击“抽主身份”，翻到第一张 A-10 作为主身份牌，花色同时决定表里世界。</span></article>
+        <article><b>三</b><span>沿途 J/Q/K 进入羁绊区，大王小王进入王权事件区。</span></article>
+        <article><b>四</b><span>点击“抽宿命/羁绊”。强剧情模式抽满 3 道宿命；关闭后只翻 3 张。</span></article>
+        <article><b>五</b><span>点击“加入群像角色”收录当前 OC，然后继续用余牌生成下一名角色。</span></article>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
