@@ -88,6 +88,7 @@ function createEmptyState() {
     deck: [],
     eraCard: null,
     main: null,
+    mainRevealed: false,
     fateCards: [],
     fateStageDone: false,
     bonds: [],
@@ -145,8 +146,9 @@ function drawIdentity() {
     const card = state.deck.shift();
     if (isIdentityCard(card)) {
       state.main = card;
-      state.log.push(`主身份：${cardLabel(card)}。`);
-      renderMainCard(card);
+      state.mainRevealed = false;
+      state.log.push(`主身份牌已抽出：${cardLabel(card)}，点击牌面揭晓结果。`);
+      renderMainCard(card, false);
     } else {
       collectSpecial(card, state.eventZone, state.bonds);
       skipped.push(cardLabel(card));
@@ -158,7 +160,7 @@ function drawIdentity() {
 }
 
 function drawFateAndBonds() {
-  if (!ensureStarted() || !state.main) return;
+  if (!ensureStarted() || !state.main || !state.mainRevealed) return;
   if (state.fateStageDone || state.fateCards.length >= 3) return;
 
   const before = state.fateCards.length;
@@ -181,7 +183,7 @@ function drawFateAndBonds() {
 }
 
 function addCurrentOc() {
-  if (!state.main) return;
+  if (!state.main || !state.mainRevealed) return;
   const mainInfo = identities[state.main.key];
   state.roster.push({
     id: state.roster.length + 1,
@@ -193,6 +195,7 @@ function addCurrentOc() {
   });
   state.log.push(`已将第 ${state.roster.length} 名 OC 收录入群像名册。`);
   state.main = null;
+  state.mainRevealed = false;
   state.fateCards = [];
   state.fateStageDone = false;
   state.bonds = [];
@@ -226,10 +229,14 @@ function renderResult() {
   const era = state.eraCard ? formatEra(state.eraCard) : "尚未抽取时代牌";
   const mainInfo = state.main ? identities[state.main.key] : null;
   const mainMarkup = state.main
-    ? `<strong>${state.main.name}${state.main.rank} · ${mainInfo[0]} ${mainInfo[1]}</strong><p>${state.main.world} / ${state.main.tone}。${mainInfo[2]}</p>`
+    ? state.mainRevealed
+      ? `<strong>${state.main.name}${state.main.rank} · ${mainInfo[0]} ${mainInfo[1]}</strong><p>${state.main.world} / ${state.main.tone}。${mainInfo[2]}</p>`
+      : `<strong>主身份牌已封存</strong><p>点击左侧牌面翻开，揭晓身份、表里世界与后续宿命入口。</p>`
     : `<strong>尚未抽取主身份</strong><p>点击“抽主身份”，系统会翻到第一张 A-10，并把沿途 J/Q/K、大小王放入对应区域。</p>`;
 
-  const fateMarkup = state.fateCards.length
+  const fateMarkup = !state.mainRevealed && state.main
+    ? "<p>主身份尚未揭晓，宿命暂不可启封。</p>"
+    : state.fateCards.length
     ? state.fateCards.map(card => {
       const fate = fates[card.rank];
       return `<p><b>${card.name}${card.rank}</b> · ${fate[0]}【${fate[1]}】：${fate[2]}</p>`;
@@ -241,9 +248,11 @@ function renderResult() {
     : "<p>未翻出 J/Q/K，默认可按主身份自由补充 NPC 羁绊。</p>";
 
   const eventText = formatEventText(state.eventZone);
-  const promptText = state.main
+  const promptText = state.main && state.mainRevealed
     ? makePrompt(state, mainInfo)
-    : "先抽出主身份，再整合宿命、羁绊与王权事件。";
+    : state.main
+      ? "先翻开主身份牌，再整合宿命、羁绊与王权事件。"
+      : "先抽出主身份，再整合宿命、羁绊与王权事件。";
   const logMarkup = state.log.slice(-5).map(item => `<p>${item}</p>`).join("");
 
   resultScroll.innerHTML = `
@@ -257,14 +266,27 @@ function renderResult() {
     </div>`;
 }
 
-function renderMainCard(card) {
-  mainCard.className = `revealed-card drawn ${card.color}`;
-  mainCard.innerHTML = `<span class="card-suit">${card.symbol}</span><strong>${card.rank}</strong><small>${card.name}</small>`;
+function renderMainCard(card, revealed = true) {
+  state.mainRevealed = revealed;
+  mainCard.className = `revealed-card drawn ${card.color}${revealed ? "" : " flipped can-flip"}`;
+  mainCard.setAttribute("aria-label", revealed ? "主身份牌已翻开" : "点击翻开主身份牌");
+  mainCard.innerHTML = `<div class="card-face card-front"><span class="card-suit">${card.symbol}</span><strong>${card.rank}</strong><small>${card.name}</small></div><div class="card-face card-reverse" aria-hidden="true"><img src="assets/card-back.svg" alt="" /><span>点击</span></div>`;
+}
+
+function revealMainCard() {
+  if (!state.main || state.mainRevealed) return;
+  state.mainRevealed = true;
+  mainCard.classList.remove("flipped", "can-flip");
+  mainCard.setAttribute("aria-label", "主身份牌已翻开");
+  state.log.push(`主身份揭晓：${cardLabel(state.main)}。`);
+  renderResult();
+  updateControls();
 }
 
 function resetCurrentCard() {
   mainCard.className = "revealed-card";
-  mainCard.innerHTML = `<span class="card-suit">?</span><strong>未抽</strong><small>主身份</small>`;
+  mainCard.setAttribute("aria-label", "点击翻开主身份牌");
+  mainCard.innerHTML = `<div class="card-face card-front"><span class="card-suit">?</span><strong>未抽</strong><small>主身份</small></div><div class="card-face card-reverse" aria-hidden="true"><img src="assets/card-back.svg" alt="" /><span>待揭</span></div>`;
 }
 
 function formatEra(card) {
@@ -329,8 +351,8 @@ function updateControls() {
   const started = state.started;
   eraBtn.disabled = !started || Boolean(state.eraCard);
   identityBtn.disabled = !started || !state.eraCard || Boolean(state.main);
-  fateBtn.disabled = !started || !state.main || state.fateStageDone || state.fateCards.length >= 3;
-  addOcBtn.disabled = !started || !state.main;
+  fateBtn.disabled = !started || !state.main || !state.mainRevealed || state.fateStageDone || state.fateCards.length >= 3;
+  addOcBtn.disabled = !started || !state.main || !state.mainRevealed;
 }
 
 function renderRuleCards() {
@@ -366,6 +388,13 @@ identityBtn.addEventListener("click", drawIdentity);
 fateBtn.addEventListener("click", drawFateAndBonds);
 addOcBtn.addEventListener("click", addCurrentOc);
 clearBtn.addEventListener("click", clearResult);
+mainCard.addEventListener("click", revealMainCard);
+mainCard.addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    revealMainCard();
+  }
+});
 renderRuleCards();
 renderResult();
 renderRoster();
