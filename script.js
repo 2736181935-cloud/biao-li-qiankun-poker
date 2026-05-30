@@ -80,8 +80,13 @@ const mainCard = document.querySelector("#mainCard");
 const rosterCount = document.querySelector("#rosterCount");
 const rosterList = document.querySelector("#rosterList");
 const tabs = document.querySelectorAll(".tab");
+const introGate = document.querySelector("#introGate");
+const enterBtn = document.querySelector("#enterBtn");
+const drawAura = document.querySelector("#drawAura");
+const sparkField = document.querySelector("#sparkField");
 
 let state = createEmptyState();
+let effectTimer = null;
 
 function createEmptyState() {
   return {
@@ -117,6 +122,7 @@ function shuffle(cards) {
 }
 
 function startNewGame() {
+  triggerDrawEffect("shuffle");
   const oldRoster = state.roster;
   state = createEmptyState();
   state.roster = oldRoster;
@@ -131,6 +137,7 @@ function startNewGame() {
 
 function drawEra() {
   if (!ensureStarted() || state.eraCard) return;
+  triggerDrawEffect("era");
   const card = state.deck.shift();
   state.eraCard = card;
   collectSpecial(card, state.eventZone, state.bonds);
@@ -141,6 +148,7 @@ function drawEra() {
 
 function drawIdentity() {
   if (!ensureStarted() || !state.eraCard || state.main) return;
+  triggerDrawEffect("identity");
   const skipped = [];
   while (state.deck.length && !state.main) {
     const card = state.deck.shift();
@@ -162,6 +170,7 @@ function drawIdentity() {
 function drawFateAndBonds() {
   if (!ensureStarted() || !state.main || !state.mainRevealed) return;
   if (state.fateStageDone || state.fateCards.length >= 3) return;
+  triggerDrawEffect("fate");
 
   const before = state.fateCards.length;
   const revealed = [];
@@ -184,6 +193,7 @@ function drawFateAndBonds() {
 
 function addCurrentOc() {
   if (!state.main || !state.mainRevealed) return;
+  triggerDrawEffect("roster");
   const mainInfo = identities[state.main.key];
   state.roster.push({
     id: state.roster.length + 1,
@@ -275,6 +285,7 @@ function renderMainCard(card, revealed = true) {
 
 function revealMainCard() {
   if (!state.main || state.mainRevealed) return;
+  triggerDrawEffect("reveal");
   state.mainRevealed = true;
   mainCard.classList.remove("flipped", "can-flip");
   mainCard.setAttribute("aria-label", "主身份牌已翻开");
@@ -324,6 +335,7 @@ function makePrompt(game, mainInfo) {
 }
 
 function clearResult() {
+  triggerDrawEffect("clear");
   state = createEmptyState();
   resetCurrentCard();
   renderResult();
@@ -382,6 +394,34 @@ function bindTabs() {
   });
 }
 
+function enterExperience() {
+  introGate.classList.add("hidden");
+  triggerDrawEffect("enter");
+}
+
+function triggerDrawEffect(type = "draw") {
+  if (!drawAura || !sparkField) return;
+  if (effectTimer) window.clearTimeout(effectTimer);
+  drawAura.classList.remove("active");
+  void drawAura.offsetWidth;
+  drawAura.classList.add("active");
+
+  const sparkCount = type === "reveal" ? 22 : type === "fate" ? 18 : 14;
+  sparkField.innerHTML = "";
+  for (let i = 0; i < sparkCount; i += 1) {
+    const spark = document.createElement("i");
+    spark.className = "spark";
+    spark.style.setProperty("--angle", `${Math.round((360 / sparkCount) * i + Math.random() * 16)}deg`);
+    spark.style.animationDelay = `${Math.random() * 120}ms`;
+    sparkField.appendChild(spark);
+  }
+
+  effectTimer = window.setTimeout(() => {
+    sparkField.innerHTML = "";
+    effectTimer = null;
+  }, 1100);
+}
+
 newGameBtn.addEventListener("click", startNewGame);
 eraBtn.addEventListener("click", drawEra);
 identityBtn.addEventListener("click", drawIdentity);
@@ -394,6 +434,10 @@ mainCard.addEventListener("keydown", event => {
     event.preventDefault();
     revealMainCard();
   }
+});
+enterBtn.addEventListener("click", enterExperience);
+introGate.addEventListener("click", event => {
+  if (event.target === introGate) enterExperience();
 });
 renderRuleCards();
 renderResult();
