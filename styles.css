@@ -115,8 +115,19 @@ button { cursor: pointer; }
   letter-spacing: .34em;
   font-size: 12px;
 }
+.intro-speaker {
+  width: fit-content;
+  margin: 14px auto 0;
+  padding: 5px 12px;
+  color: #3b090e;
+  background: linear-gradient(135deg, #fff3bd, #d9a64e);
+  border: 1px solid rgba(255,240,184,.82);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
 .intro-card h2 {
-  margin: 12px 0 14px;
+  margin: 14px 0 14px;
   color: var(--pearl);
   font-size: 44px;
   line-height: 1.1;
@@ -127,6 +138,29 @@ button { cursor: pointer; }
   max-width: 390px;
   color: #f6dba9;
   line-height: 1.75;
+  min-height: 84px;
+  transition: opacity .22s ease, transform .22s ease;
+}
+.intro-card.changing p,
+.intro-card.changing h2 {
+  opacity: .08;
+  transform: translateY(6px);
+}
+.intro-steps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 22px;
+}
+.intro-steps span {
+  width: 24px;
+  height: 3px;
+  border: 1px solid rgba(255,232,168,.4);
+  background: rgba(255,232,168,.16);
+}
+.intro-steps span.active {
+  background: var(--gold-bright);
+  box-shadow: 0 0 18px rgba(255,232,168,.45);
 }
 .intro-action {
   min-height: 52px;
