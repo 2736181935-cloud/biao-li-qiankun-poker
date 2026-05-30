@@ -8,9 +8,20 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="intro-gate" id="introGate" aria-label="开局引导">
+    <div class="intro-bg" aria-hidden="true"></div>
+    <div class="intro-card">
+      <span class="intro-kicker">表里乾坤</span>
+      <h2>帘开，命牌入局。</h2>
+      <p>循朱门灯影入局，先洗牌，再揭身世。每一次翻面，都会惊动一段隐秘旧事。</p>
+      <button class="intro-action" id="enterBtn" type="button">入局抽牌</button>
+    </div>
+  </div>
   <main class="shell">
     <section class="hero" aria-label="表里乾坤抽牌台">
       <div class="ink-wash" aria-hidden="true"></div>
+      <div class="light-ribbon ribbon-one" aria-hidden="true"></div>
+      <div class="light-ribbon ribbon-two" aria-hidden="true"></div>
       <nav class="topbar" aria-label="主导航">
         <div class="brand-mark" aria-hidden="true">乾</div>
         <div class="brand-copy">
@@ -31,6 +42,8 @@
 
           <div class="draw-stage">
             <div class="card-stack">
+              <div class="draw-aura" id="drawAura" aria-hidden="true"></div>
+              <div class="spark-field" id="sparkField" aria-hidden="true"></div>
               <img src="assets/card-back.svg" alt="" class="card-back ghost ghost-one" />
               <img src="assets/card-back.svg" alt="" class="card-back ghost ghost-two" />
               <article class="revealed-card" id="mainCard" role="button" tabindex="0" aria-label="点击翻开主身份牌">
