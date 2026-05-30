@@ -84,9 +84,36 @@ const introGate = document.querySelector("#introGate");
 const enterBtn = document.querySelector("#enterBtn");
 const drawAura = document.querySelector("#drawAura");
 const sparkField = document.querySelector("#sparkField");
+const introCard = document.querySelector(".intro-card");
+const introSpeaker = document.querySelector("#introSpeaker");
+const introTitle = document.querySelector("#introTitle");
+const introText = document.querySelector("#introText");
+const introSteps = document.querySelectorAll(".intro-steps span");
 
 let state = createEmptyState();
 let effectTimer = null;
+let introStep = 0;
+
+const introScenes = [
+  {
+    speaker: "司命官",
+    title: "帘开，命牌入局。",
+    text: "此处不是寻常牌桌。你将用一副扑克牌，为原创角色抽出身世、表里世界、宿命牵连与宫廷江湖主线。",
+    action: "继续听令"
+  },
+  {
+    speaker: "掌灯侍女",
+    title: "先定世，再定身。",
+    text: "点“新开牌局”洗牌，再抽时代牌与主身份。红牌落在白昼朝堂，黑牌牵入暗夜江湖；J/Q/K 与大小王会自动变成羁绊和王权事件。",
+    action: "我明白了"
+  },
+  {
+    speaker: "檐下旧客",
+    title: "翻开它，写下 TA 的命。",
+    text: "主身份牌会先背面封存。点击牌面揭晓后，再抽宿命札，最后把这个 OC 加入群像名册。你可以反复开局，拼出一整卷宫廷江湖群像。",
+    action: "入局抽牌"
+  }
+];
 
 function createEmptyState() {
   return {
@@ -395,8 +422,28 @@ function bindTabs() {
 }
 
 function enterExperience() {
+  if (introStep < introScenes.length - 1) {
+    introStep += 1;
+    renderIntroScene();
+    return;
+  }
   introGate.classList.add("hidden");
   triggerDrawEffect("enter");
+}
+
+function renderIntroScene() {
+  const scene = introScenes[introStep];
+  introCard.classList.add("changing");
+  window.setTimeout(() => {
+    introSpeaker.textContent = scene.speaker;
+    introTitle.textContent = scene.title;
+    introText.textContent = scene.text;
+    enterBtn.textContent = scene.action;
+    introSteps.forEach((step, index) => {
+      step.classList.toggle("active", index === introStep);
+    });
+    introCard.classList.remove("changing");
+  }, 170);
 }
 
 function triggerDrawEffect(type = "draw") {
@@ -437,8 +484,9 @@ mainCard.addEventListener("keydown", event => {
 });
 enterBtn.addEventListener("click", enterExperience);
 introGate.addEventListener("click", event => {
-  if (event.target === introGate) enterExperience();
+  if (event.target === introGate && introStep >= introScenes.length - 1) enterExperience();
 });
+renderIntroScene();
 renderRuleCards();
 renderResult();
 renderRoster();
